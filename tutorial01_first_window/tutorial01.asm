@@ -1,3 +1,6 @@
+%include "GLEWN.INC"
+%include "GLFW3N.INC"
+
 ;; Define the externs for the functions that we'll use in this program. 
 extern glfwInit 
 extern glfwWindowHint
@@ -8,7 +11,7 @@ extern glfwGetKey
 extern glfwWindowShouldClose
 extern glfwPollEvents
 extern glClearColor
-extern _glewInit@0 
+extern glewInit
 
 ;; Import the Win32 API functions. 
 import glfwInit glfw3.dll 
@@ -21,7 +24,7 @@ import glfwWindowShouldClose glfw3.dll
 import glfwPollEvents glfw3.dll
 
 import glClearColor opengl32.dll
-import _glewInit@0 glew32.dll
+import glewInit glew32.dll _glewInit@0 
 
 section .code use32 Class=CODE
 
@@ -35,16 +38,16 @@ section .code use32 Class=CODE
 
   call [glfwInit]
   push dword 4
-  push dword 0x0002100D ;;note renamed GLFW_FSAA_SAMPLES
+  push dword GLFW_SAMPLES ;note renamed GLFW_FSAA_SAMPLES
   call [glfwWindowHint]
   push dword 3
-  push dword 0x00022002;;note renamed GLFW_OPENGL_VERSION_MAJOR
+  push dword GLFW_CONTEXT_VERSION_MAJOR ;;note renamed GLFW_OPENGL_VERSION_MAJOR
   call [glfwWindowHint]
   push dword 3
-  push dword 0x00022003;;note renamed GLFW_OPENGL_VERSION_MINOR
+  push dword GLFW_CONTEXT_VERSION_MINOR ;;note renamed GLFW_OPENGL_VERSION_MINOR
   call [glfwWindowHint]
-  push dword 0x00032001 ;;GLFW_OPENGL_CORE_PROFILE
-  push dword 0x00022008 ;;GLFW_OPENGL_PROFILE
+  push dword GLFW_OPENGL_CORE_PROFILE
+  push dword GLFW_OPENGL_PROFILE
   call [glfwWindowHint]
 
   push dword 0 ;;Null
@@ -55,7 +58,7 @@ section .code use32 Class=CODE
   call [glfwCreateWindow]
   add  dword esp,52 ;clean up the stack from all these std calls
   push eax
-  call [_glewInit@0]
+  call [glewInit]
 
   push dword 0
   push dword [ZP4] 
@@ -68,7 +71,7 @@ section .code use32 Class=CODE
   call [glfwSwapBuffers] ;as this is a std call and window is allready on stack
   ;we dont need to give it any other params.
   pop eax
-  push dword 256 ;;note renamed GLFW_KEY_ESCAPE
+  push dword GLFW_KEY_ESCAPE;;note renamed GLFW_KEY_ESC
   push eax
   call [glfwGetKey]
   sub dword eax,0
@@ -85,5 +88,5 @@ section .code use32 Class=CODE
 
 
 section .data USE32
-Title   db "NeHE's OpenGL Framework", 0 
+Title   db "Tutorial 01", 0 
 ZP4 dd 0.4
