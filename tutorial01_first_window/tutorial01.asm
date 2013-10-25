@@ -6,6 +6,7 @@
 extern _glfwInit 
 extern _glfwWindowHint
 extern _glfwCreateWindow
+extern _glfwMakeContextCurrent
 extern _glfwTerminate
 extern _glfwSwapBuffers
 extern _glfwGetKey
@@ -63,10 +64,11 @@ main:
  .CreateWindowSuccess:
  
   push eax ;;This is the window reference stick on top of stack as its used lots
-  
+  call _glfwMakeContextCurrent ;Added for GLFWV3
+
   call _glewInit@0
   sub dword eax,0
-  jnz .GlewInitSuccess  ;;GLEW_OKAY is 1
+  jz .GlewInitSuccess  ;;GLEW_OKAY is 0
   ;;Say somethign useful about glew failing
   push dword -1
   jmp .terminate
