@@ -24,8 +24,16 @@ section .code use32 Class=CODE
 global _start
 ;; Entry point of program
 _start: 
+main:
 
   call _glfwInit
+  sub dword eax,0
+  jnz .InitSuccess
+  ;;Say something usefull
+  push dword -1
+  jmp .exit
+ .InitSuccess:
+ 
   push dword 4
   push dword GLFW_SAMPLES ;note renamed GLFW_FSAA_SAMPLES
   call _glfwWindowHint
@@ -46,16 +54,31 @@ _start:
   push dword 1024
   call _glfwCreateWindow
   add  dword esp,52 ;clean up the stack from all these std calls
-  push eax
+  
+  sub dword eax,0
+  jnz .CreateWindowSuccess
+  ;;Say something useful about window fail
+  push dword -1
+  jmp .terminate
+ .CreateWindowSuccess:
+ 
+  push eax ;;This is the window reference stick on top of stack as its used lots
+  
   call _glewInit@0
-
+  sub dword eax,0
+  jnz .GlewInitSuccess  ;;GLEW_OKAY is 1
+  ;;Say somethign useful about glew failing
+  push dword -1
+  jmp .terminate
+ .GlewInitSuccess:
+ 
   push dword 0
   push dword [ZP4] 
   push dword 0
   push dword 0
   call _glClearColor@16 ;note this is a cdecl call
-  nop
- buffloop:
+  
+ .buffloop:
   call _glfwPollEvents
   call _glfwSwapBuffers ;as this is a std call and window is allready on stack
   ;we dont need to give it any other params.
@@ -64,17 +87,18 @@ _start:
   push eax
   call _glfwGetKey
   sub dword eax,0
-  jnz terminate
+  jnz .terminate
   pop eax
   mov [esp],eax
   call _glfwWindowShouldClose
   sub dword eax,0
-  jnz terminate
-  jmp buffloop
-  nop
- terminate:
+  jnz .terminate
+  jmp .buffloop
+  
+  push dword 1
+ .terminate:
   call _glfwTerminate
-  push eax
+ .exit:
   call _ExitProcess@4
 
 section .data USE32
