@@ -13,4 +13,4 @@ To link I have used Microsoft Incremental Linker with the following options:
 ```
 link.exe /subsystem:windows /verbose /nodefaultlib /entry:start kernel32.lib opengl32.lib glfw3dll.lib glew32.lib
 ```
-Note that I use glfw3dll.lib and not glfw3.lib as the second one is used for debug builds.
+Note that I use glfw3dll.lib and not glfw3.lib as the second one is used for static linking.
