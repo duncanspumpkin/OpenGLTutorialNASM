@@ -1,42 +1,7 @@
 ;; Define the externs for the functions that we'll use in this program. 
 %include "GLEWN.INC"
 %include "GLFW3N.INC"
-
-%macro GlewExternImport 1
- %ifidn __OUTPUT_FORMAT__, win32
-  %define __CALL__%1 __imp____%1
- %elifidn __OUTPUT_FORMAT__, obj
-  %define __CALL__%1 __%1
-  import __%1 glew32.dll
- %endif
-
- extern __CALL__%1 
-%endmacro
-
-%macro callglew 1
-mov dword eax,[__CALL__%1]
-call [eax]
-%endmacro
-
-%macro ExternImport 3
-%ifidn __OUTPUT_FORMAT__, win32
- %ifidn %3,-
-  %define __CALL__%1 _%1
- %elif
-  %define __CALL__%1 _%1@%3
- %endif
- extern __CALL__%1
-%elifidn __OUTPUT_FORMAT__, obj
- import %1 %2
- extern %1
- %define __CALL__%1 [%1]
-%endif
-%endmacro
-
-%macro callp 1
-call __CALL__%1
-%endmacro
-
+%include "MULTILINK.INC"
 
 ;; Define the externs for the functions that we'll use in this program. 
 ExternImport glfwInit, glfw3.dll,-
@@ -51,8 +16,8 @@ ExternImport glfwWaitEvents,glfw3.dll,-
 ExternImport glfwPollEvents,glfw3.dll,-
 ExternImport glClearColor,opengl32.dll,16
 ExternImport ExitProcess,kernel32.dll,4
-GlewExternImport glewBindVertexArray
-GlewExternImport glewGenVertexArrays
+GlewExternImport BindVertexArray
+GlewExternImport GenVertexArrays
 
 extern _glewInit@0 
 %ifidn __OUTPUT_FORMAT__, obj  ;There is always one difficult one
@@ -133,9 +98,9 @@ main:
   
   push dword VertexArrayID
   push dword 1
-  callglew glewGenVertexArrays
+  callglew GenVertexArrays
   push dword VertexArrayID
-  callglew glewBindVertexArray
+  callglew BindVertexArray
 
  .buffloop:
   callp glfwPollEvents
