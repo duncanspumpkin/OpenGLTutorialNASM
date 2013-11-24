@@ -1,24 +1,25 @@
 ;; Define the externs for the functions that we'll use in this program. 
 %include "GLEWN.INC"
 %include "GLFW3N.INC"
-
 %include "MULTILINK.INC"
 
 ;; Define the externs for the functions that we'll use in this program. 
-ExternImport glfwInit, glfw3.dll,-
-ExternImport glfwWindowHint,glfw3.dll,-
-ExternImport glfwCreateWindow,glfw3.dll,-
+ExternImport glfwInit,              glfw3.dll,-
+ExternImport glfwWindowHint,        glfw3.dll,-
+ExternImport glfwCreateWindow,      glfw3.dll,-
 ExternImport glfwMakeContextCurrent,glfw3.dll,-
-ExternImport glfwTerminate,glfw3.dll,-
-ExternImport glfwSwapBuffers,glfw3.dll,-
-ExternImport glfwGetKey,glfw3.dll,-
-ExternImport glfwWindowShouldClose,glfw3.dll,-
-ExternImport glfwWaitEvents,glfw3.dll,-
-ExternImport glfwPollEvents,glfw3.dll,-
-ExternImport glClearColor,opengl32.dll,16
-ExternImport ExitProcess,kernel32.dll,4
-ExternImport glClear,opengl32.dll,4
-ExternImport glDrawArrays,opengl32.dll,12
+ExternImport glfwTerminate,         glfw3.dll,-
+ExternImport glfwSwapBuffers,       glfw3.dll,-
+ExternImport glfwGetKey,            glfw3.dll,-
+ExternImport glfwWindowShouldClose, glfw3.dll,-
+ExternImport glfwWaitEvents,        glfw3.dll,-
+ExternImport glfwPollEvents,        glfw3.dll,-
+ExternImport glfwWaitEvents,        glfw3.dll,-
+ExternImport ExitProcess,           kernel32.dll,4
+ExternImport glClear,               opengl32.dll,4
+ExternImport glClearColor,          opengl32.dll,16
+ExternImport glDrawArrays,          opengl32.dll,12
+
 GlewExternImport BindVertexArray
 GlewExternImport GenVertexArrays
 GlewExternImport BindVertexArray
@@ -184,6 +185,9 @@ main:
   callp glfwWindowShouldClose
   sub dword eax,0
   jnz .terminate
+  
+  callp glfwWaitEvents
+
   jmp .buffloop
   
   push dword 1
