@@ -2,30 +2,23 @@
 %include "GLEWN.INC"
 %include "GLFW3N.INC"
 
-%macro GlewExternWrapper 1
-%ifdef GLEW_STATIC_DLL
-extern __%1
-%elifdef GLEW_SHARED_DLL
-extern __imp____%1
-%elifdef GLEW_IMPORT_DLL
-import __%1 glew32.dll
-extern __%1
-%endif
+%macro GlewExternImport 1
+ %ifidn __OUTPUT_FORMAT__, win32
+  %define __CALL__%1 __imp____%1
+ %elifidn __OUTPUT_FORMAT__, obj
+  %define __CALL__%1 __%1
+  import __%1 glew32.dll
+ %endif
+
+ extern __CALL__%1 
 %endmacro
 
 %macro callglew 1
-%ifdef GLEW_STATIC_DLL
-call %1
-%elifdef GLEW_SHARED_DLL
-mov dword eax,[__imp____%1]
+mov dword eax,[__CALL__%1]
 call [eax]
-%elifdef GLEW_IMPORT_DLL
-mov dword eax,[__%1]
-call [eax]
-%endif
 %endmacro
 
-%macro ExternImport 2-3
+%macro ExternImport 3
 %ifidn __OUTPUT_FORMAT__, win32
  %ifidn %3,-
   %define __CALL__%1 _%1
@@ -34,8 +27,8 @@ call [eax]
  %endif
  extern __CALL__%1
 %elifidn __OUTPUT_FORMAT__, obj
- extern %1
  import %1 %2
+ extern %1
  %define __CALL__%1 [%1]
 %endif
 %endmacro
@@ -44,7 +37,6 @@ call [eax]
 call __CALL__%1
 %endmacro
 
-GlewExternWrapper glewBindVertexArray
 
 ;; Define the externs for the functions that we'll use in this program. 
 ExternImport glfwInit, glfw3.dll,-
@@ -55,8 +47,12 @@ ExternImport glfwTerminate,glfw3.dll,-
 ExternImport glfwSwapBuffers,glfw3.dll,-
 ExternImport glfwGetKey,glfw3.dll,-
 ExternImport glfwWindowShouldClose,glfw3.dll,-
+ExternImport glfwWaitEvents,glfw3.dll,-
 ExternImport glfwPollEvents,glfw3.dll,-
 ExternImport glClearColor,opengl32.dll,16
+ExternImport ExitProcess,kernel32.dll,4
+GlewExternImport glewBindVertexArray
+GlewExternImport glewGenVertexArrays
 
 extern _glewInit@0 
 %ifidn __OUTPUT_FORMAT__, obj  ;There is always one difficult one
@@ -66,21 +62,20 @@ extern _glewInit@0
  %define __CALL__glewInit _glewInit@0
 %endif
 
-ExternImport ExitProcess,kernel32.dll,4
+
 
 section .code use32 Class=CODE
 
-;; In order to make this code as similar as possible to NeHe's OpenGL tutorial
-;; we will first get all of the params of WinMain and call the WinMain function
-;; if we were going for as small a program as possible this could be done all in
-;; the WinMain function.
-global _start
 ;; Entry point of program
 %ifidn __OUTPUT_FORMAT__, obj
-..start: 
+ ..start:
 %elif 
-_start:
+ global _WinMain@16
+ _WinMain@16:
+ global _start
+ _start:
 %endif
+
 main:
 
   callp glfwInit
@@ -128,16 +123,20 @@ main:
   ;;Say somethign useful about glew failing
   push dword -1
   jmp .terminate
-
-  callglew glewBindVertexArray
  .GlewInitSuccess:
- 
+
   push dword 0
   push dword [ZP4] 
   push dword 0
   push dword 0
   callp glClearColor ;note this is a cdecl call
   
+  push dword VertexArrayID
+  push dword 1
+  callglew glewGenVertexArrays
+  push dword VertexArrayID
+  callglew glewBindVertexArray
+
  .buffloop:
   callp glfwPollEvents
   callp glfwSwapBuffers ;as this is a std call and window is allready on stack
@@ -147,15 +146,21 @@ main:
   push eax
   callp glfwGetKey
   sub dword eax,0
-  jnz .terminate
+  jnz .buffloopEnd
+
   pop eax
   mov [esp],eax
   callp glfwWindowShouldClose
   sub dword eax,0
-  jnz .terminate
-  jmp .buffloop
+  jnz .buffloopEnd
   
+  callp glfwWaitEvents
+
+  jmp .buffloop
+
+ .buffloopEnd:
   push dword 1
+
  .terminate:
   callp glfwTerminate
  .exit:
@@ -164,3 +169,6 @@ main:
 section .data USE32
 Title   db "Tutorial 01", 0 
 ZP4 dd 0.4
+
+section .bss USE32
+VertexArrayID resd 1
