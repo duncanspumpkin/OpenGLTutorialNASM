@@ -1,3 +1,4 @@
+;; #vim asmsyntax=nasm
 ;; Define the externs for the functions that we'll use in this program. 
 %include "GLEWN.INC"
 %include "GLFW3N.INC"
