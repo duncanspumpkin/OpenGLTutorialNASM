@@ -1,4 +1,4 @@
-;;vim asmsyntax=NASM
+;; #vim asmsyntax=NASM
 GL_VERSION_1_1 EQU 1
 GL_ZERO EQU 0
 GL_FALSE EQU 0

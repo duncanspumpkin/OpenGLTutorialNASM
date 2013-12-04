@@ -17,8 +17,6 @@ ExternImport glfwWaitEvents,        glfw3.dll,-
 ExternImport glfwPollEvents,        glfw3.dll,-
 ExternImport glClearColor,          opengl32.dll,16
 ExternImport ExitProcess,           kernel32.dll,4
-GlewExternImport BindVertexArray
-GlewExternImport GenVertexArrays
 
 extern _glewInit@0 
 %ifidn __OUTPUT_FORMAT__, obj  ;There is always one difficult one
@@ -92,17 +90,11 @@ main:
  .GlewInitSuccess:
 
   push dword 0
-  push dword [ZP4] 
+  push dword __float32__(0.4) 
   push dword 0
   push dword 0
   callp glClearColor ;note this is a cdecl call
   
-  push dword VertexArrayID
-  push dword 1
-  callglew GenVertexArrays
-  push dword VertexArrayID
-  callglew BindVertexArray
-
  .buffloop:
   callp glfwPollEvents
   callp glfwSwapBuffers ;as this is a std call and window is allready on stack
@@ -134,7 +126,3 @@ main:
 
 section .data USE32
 Title   db "Tutorial 01", 0 
-ZP4 dd 0.4
-
-section .bss USE32
-VertexArrayID resd 1

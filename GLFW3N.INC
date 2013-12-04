@@ -1,4 +1,4 @@
-;;vim asmsyntax=nasm
+;; #vim asmsyntax=nasm
 GLFW_VERSION_MAJOR EQU 3
 GLFW_VERSION_MINOR EQU 0
 GLFW_VERSION_REVISION EQU 2

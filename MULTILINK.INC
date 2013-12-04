@@ -1,3 +1,4 @@
+;; #vim asmsyntax=nasm
 %macro GlewExternImport 1
  %ifidn __OUTPUT_FORMAT__, win32
   %ifdef GLEW_STATIC
